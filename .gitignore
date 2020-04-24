@@ -137,5 +137,5 @@ dmypy.json
 cython_debug/
 
 # orig
-result/
+results/
 
