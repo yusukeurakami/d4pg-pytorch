@@ -66,6 +66,7 @@ class Agent(object):
 
             ep_start_time = time.time()
             state = self.env_wrapper.reset()
+            current_pos = state[:self.config["action_dim"]]
             self.ou_noise.reset()
             done = False
             while not done:
@@ -75,7 +76,18 @@ class Agent(object):
                     action = action.squeeze(0)
                 else:
                     action = action.detach().cpu().numpy().flatten()
-                next_state, reward, done = self.env_wrapper.step(action)
+
+                next_a = action
+                if self.config["pos_control"]:
+                    # print("current pos: ",current_pos)
+                    next_a += current_pos
+                for _ in range(self.config["action_repeat"]):
+                    next_state, reward, done = self.env_wrapper.step(next_a) # Step
+                    if done:
+                        break
+                current_pos = next_state[:self.config["action_dim"]]
+
+                # next_state, reward, done = self.env_wrapper.step(action)
 
                 episode_reward += reward
 
@@ -102,7 +114,7 @@ class Agent(object):
 
                 state = next_state
 
-                if done or num_steps == self.max_steps:
+                if done or num_steps >= self.max_steps:
                     # add rest of experiences remaining in buffer
                     while len(self.exp_buffer) != 0:
                         state_0, action_0, reward_0 = self.exp_buffer.popleft()

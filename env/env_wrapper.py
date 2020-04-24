@@ -1,10 +1,11 @@
 import gym
+import doorenv2
 
 
 class EnvWrapper:
-    def __init__(self, env_name):
+    def __init__(self, env_name, env_kwargs=None):
         self.env_name = env_name
-        self.env = gym.make(self.env_name)
+        self.env = gym.make(self.env_name, **env_kwargs)
 
     def reset(self):
         state = self.env.reset()
