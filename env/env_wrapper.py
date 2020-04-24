@@ -1,11 +1,23 @@
 import gym
+from gym import spaces
 import doorenv2
+import numpy as np
+from dm_env import specs
 
 
 class EnvWrapper:
     def __init__(self, env_name, env_kwargs=None):
         self.env_name = env_name
         self.env = gym.make(self.env_name, **env_kwargs)
+
+        # true and normalized action spaces
+        self._true_action_space = self.env.action_space
+        self._norm_action_space = spaces.Box(
+            low=-1.0,
+            high=1.0,
+            shape=self._true_action_space.shape,
+            dtype=np.float32
+        )
 
     def reset(self):
         state = self.env.reset()

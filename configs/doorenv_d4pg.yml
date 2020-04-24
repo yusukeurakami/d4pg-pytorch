@@ -7,7 +7,7 @@ action_low: -1
 action_high: 1
 num_agents: 2
 random_seed: 2019
-pos_control: True
+pos_control: False
 action_repeat: 1
 id: batch_size=256_replay-queue-size=64_batch-queue-size=64_replay-memory-prioritized=0_pos-2
 

@@ -80,9 +80,9 @@ class Agent(object):
                     action = action.detach().cpu().numpy().flatten()
 
                 next_a = action
-                if self.config["pos_control"]:
-                    # print("current pos: ",current_pos)
-                    next_a += current_pos
+                # if self.config["pos_control"]:
+                #     # print("current pos: ",current_pos)
+                #     next_a += current_pos
                 for _ in range(self.config["action_repeat"]):
                     next_state, reward, done = self.env_wrapper.step(next_a) # Step
                     if done:
