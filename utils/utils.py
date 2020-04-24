@@ -31,6 +31,7 @@ class OUNoise(object):
         ou_state = self.evolve_state()
         self.sigma = self.max_sigma - (self.max_sigma - self.min_sigma) * min(1.0, t/self.decay_period)
         action = action.cpu().detach().numpy()
+        # print("noise: ", ou_state)
         return np.clip(action + ou_state, self.low, self.high)
 
 

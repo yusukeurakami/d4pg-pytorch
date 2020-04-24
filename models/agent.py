@@ -71,9 +71,11 @@ class Agent(object):
             done = False
             while not done:
                 action = self.actor.get_action(state)
+                # print("action mean: ", action)
                 if self.agent_type == "exploration":
                     action = self.ou_noise.get_action(action, num_steps)
                     action = action.squeeze(0)
+                    # print("action with noise :", action)
                 else:
                     action = action.detach().cpu().numpy().flatten()
 
@@ -148,6 +150,64 @@ class Agent(object):
             rewards.append(episode_reward)
             if self.agent_type == "exploration" and self.local_episode % self.config['update_agent_ep'] == 0:
                 self.update_actor_learner(learner_w_queue, training_on)
+
+
+            ###########################
+            if self.local_episode%100 == 0:
+                print("evaluate")
+                avg_reward = 0.
+                episodes = 20
+                succeeded = 0
+                rewards = []
+                for _ in range(episodes):
+                    episode_reward = 0
+                    num_steps = 0
+
+                    state = self.env_wrapper.reset()
+                    current_pos = state[:self.config["action_dim"]]
+                    self.ou_noise.reset()
+                    done = False
+                    while not done:
+                        action = self.actor.get_action(state)
+                        action = action.detach().cpu().numpy().flatten()
+
+                        next_a = action
+                        if self.config["pos_control"]:
+                            # print("current pos: ",current_pos)
+                            next_a += current_pos
+                        for _ in range(self.config["action_repeat"]):
+                            next_state, reward, done = self.env_wrapper.step(next_a) # Step
+                            if done:
+                                break
+                        current_pos = next_state[:self.config["action_dim"]]
+
+                        # next_state, reward, done = self.env_wrapper.step(action)
+
+                        episode_reward += reward
+
+                        state = self.env_wrapper.normalise_state(state)
+                        reward = self.env_wrapper.normalise_reward(reward)
+
+                        state = next_state
+
+                        if done or num_steps >= self.max_steps:
+                            if abs(self.env_wrapper.env.env.get_doorangle())>=0.2:
+                                succeeded += 1
+                            # else:
+                            #     print("not opened")
+
+                        num_steps += 1
+
+                avg_reward += episode_reward
+            
+                avg_reward /= episodes
+                succeeded /= episodes
+                self.logger.scalar_summary("agent/test", avg_reward, step)
+                self.logger.scalar_summary("agent/success_rate", succeeded, step)
+                print("----------------------------------------")
+                print("Test Episodes: {}, Avg. Reward: {}, Success rate {}% per {} trials".format(episodes, round(avg_reward, 2), round(succeeded, 2), episodes))
+                print("----------------------------------------")
+            ###########################
 
         empty_torch_queue(replay_queue)
         print(f"Agent {self.n_agent} done.")

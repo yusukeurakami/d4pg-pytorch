@@ -105,7 +105,7 @@ class Engine(object):
         n_agents = config['num_agents']
 
         # Create directory for experiment
-        experiment_dir = f"{config['results_path']}/{config['env']}-{config['model']}-{datetime.now():%Y-%m-%d_%H:%M:%S}"
+        experiment_dir = f"{config['results_path']}/{config['model']}-{config['env']}-{config['id']}-{datetime.now():%Y-%m-%d_%H:%M:%S}"
         if not os.path.exists(experiment_dir):
             os.makedirs(experiment_dir)
 

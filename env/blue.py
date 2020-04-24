@@ -10,7 +10,7 @@ class BlueWrapper(EnvWrapper):
         env_kwargs = dict(port = 1050,
                         visionnet_input = False,
                         unity = False,
-                        world_path = '/home/demo/DoorGym/world_generator/world/pull_blue_right_v2_gripper_{}_lefthinge_single/'.format(actuator),
+                        world_path = '/u/home/urakamiy/doorgym/world_generator/world/pull_blue_right_v2_gripper_{}_lefthinge_single/'.format(actuator),
                         pos_control = pos_control,
                         ik_control = False)
 
