@@ -122,6 +122,8 @@ class Agent(object):
                 state = next_state
 
                 if done or num_steps >= self.max_steps:
+                    # if self.n_agent:
+                    #     print("episode done. Step was ",num_steps)
                     # add rest of experiences remaining in buffer
                     while len(self.exp_buffer) != 0:
                         state_0, action_0, reward_0 = self.exp_buffer.popleft()
@@ -210,19 +212,21 @@ class Agent(object):
             # Saving agent
             reward_outperformed = succeeded - best_succeeded > self.config["save_success_rate_threshold"]
             # reward_outperformed = episode_reward - best_reward > self.config["save_reward_threshold"]
-            time_to_save = step % self.num_step_save == 0
+            time_to_save = self.local_episode % self.num_episode_save == 0
             if self.n_agent == 0 and (time_to_save or reward_outperformed):
+                # print(time_to_save, reward_outperformed)
                 # if episode_reward > best_reward:
                 #     best_reward = episode_reward
                 if succeeded > best_succeeded:
                     best_succeeded = succeeded
-                self.save(f"local_episode_{step}_reward_{best_succeeded:4f}")
+                self.save(f"agent-{self.n_agent}_local-episode-{self.local_episode}_step-{step}_success-{best_succeeded:4f}")
             ###########################
 
         empty_torch_queue(replay_queue)
         print(f"Agent {self.n_agent} done.")
 
     def save(self, checkpoint_name):
+        print("save the model", checkpoint_name)
         process_dir = f"{self.log_dir}/agent_{self.n_agent}"
         if not os.path.exists(process_dir):
             os.makedirs(process_dir)
