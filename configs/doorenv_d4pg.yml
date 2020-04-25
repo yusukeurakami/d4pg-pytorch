@@ -5,11 +5,11 @@ state_dim: 19
 action_dim: 8
 action_low: -1
 action_high: 1
-num_agents: 2
+num_agents: 4
 random_seed: 2019
 pos_control: False
 action_repeat: 1
-id: batch_size=256_replay-queue-size=64_batch-queue-size=64_replay-memory-prioritized=0_pos-2
+id: batch_size=256_replay-queue-size=64_batch-queue-size=64_replay-memory-prioritized=0_torque_ctrlrange=-20+20
 
 # Training parameters
 
@@ -27,11 +27,13 @@ update_agent_ep: 1 # agent gets latest parameters from learner every update_agen
 replay_queue_size: 64 # queue with replays from all the agents
 batch_queue_size: 64 # queue with batches given to learner
 replay_memory_prioritized: 0
-num_episode_save: 100_000
+num_episode_save: 100
+num_step_save: 50_000
 device: cuda
 agent_device: cpu
 save_buffer_on_disk: 0
 save_reward_threshold: 1 # difference in best reward to save agent model
+save_success_rate_threshold: 0.1 # difference in best reward to save agent model
 
 
 # Network parameters
@@ -46,5 +48,5 @@ v_max: 5000 # upper bound of critic value output distribution
 tau: 0.001 # parameter for soft target network updates
 
 # Miscellaneous
-results_path: results
+results_path: results-dev
 

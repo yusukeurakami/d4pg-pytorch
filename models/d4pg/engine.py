@@ -34,7 +34,7 @@ def sampler_worker(config, replay_queue, batch_queue, replay_priorities_queue, t
         log_dir:
     """
     batch_size = config['batch_size']
-    logger = Logger(f"{log_dir}/data_struct")
+    # logger = Logger(f"{log_dir}/data_struct")
 
     # Create replay buffer
     replay_buffer = create_replay_buffer(config)
@@ -65,10 +65,10 @@ def sampler_worker(config, replay_queue, batch_queue, replay_priorities_queue, t
 
         # Log data structures sizes
         step = update_step.value
-        logger.scalar_summary("data_stuct/global_episode", global_episode.value, step)
-        logger.scalar_summary("data_struct/replay_queue", replay_queue.qsize(), step)
-        logger.scalar_summary("data_struct/batch_queue", batch_queue.qsize(), step)
-        logger.scalar_summary("data_struct/replay_buffer", len(replay_buffer), step)
+        # logger.scalar_summary("data_stuct/global_episode", global_episode.value, step)
+        # logger.scalar_summary("data_struct/replay_queue", replay_queue.qsize(), step)
+        # logger.scalar_summary("data_struct/batch_queue", batch_queue.qsize(), step)
+        # logger.scalar_summary("data_struct/replay_buffer", len(replay_buffer), step)
 
     if config['save_buffer_on_disk']:
         replay_buffer.dump(config["results_path"])

@@ -35,7 +35,7 @@ class LearnerD4PG(object):
         self.learner_w_queue = learner_w_queue
         self.delta_z = (self.v_max - self.v_min) / (self.num_atoms - 1)
 
-        self.logger = Logger(f"{log_dir}/learner")
+        # self.logger = Logger(f"{log_dir}/learner")
 
         # Noise process
         self.ou_noise = OUNoise(dim=config["action_dim"], low=config["action_low"], high=config["action_high"])
@@ -146,9 +146,9 @@ class LearnerD4PG(object):
 
         # Logging
         step = update_step.value
-        self.logger.scalar_summary("learner/policy_loss", policy_loss.item(), step)
-        self.logger.scalar_summary("learner/value_loss", value_loss.item(), step)
-        self.logger.scalar_summary("learner/learner_update_timing", time.time() - update_time, step)
+        # self.logger.scalar_summary("learner/policy_loss", policy_loss.item(), step)
+        # self.logger.scalar_summary("learner/value_loss", value_loss.item(), step)
+        # self.logger.scalar_summary("learner/learner_update_timing", time.time() - update_time, step)
 
     def run(self, training_on, batch_queue, replay_priority_queue, update_step):
         while update_step.value < self.num_train_steps:

@@ -18,6 +18,7 @@ class Agent(object):
         self.agent_type = agent_type
         self.max_steps = config['max_ep_length']
         self.num_episode_save = config['num_episode_save']
+        self.num_step_save = config['num_step_save']
         self.global_episode = global_episode
         self.local_episode = 0
         self.log_dir = log_dir
@@ -31,8 +32,9 @@ class Agent(object):
         print("Agent ", n_agent, self.actor.device)
 
         # Logger
-        log_path = f"{log_dir}/agent-{n_agent}"
-        self.logger = Logger(log_path)
+        if self.n_agent==0:
+            log_path = f"{log_dir}/agent-{n_agent}"
+            self.logger = Logger(log_path)
 
     def update_actor_learner(self, learner_w_queue, training_on):
         """Update local actor to the actor from learner. """
@@ -63,6 +65,9 @@ class Agent(object):
 
             if self.local_episode % 100 == 0:
                 print(f"Agent: {self.n_agent}  episode {self.local_episode}")
+
+            succeeded = 0.0
+            best_succeeded = 0.0
 
             ep_start_time = time.time()
             state = self.env_wrapper.reset()
@@ -134,23 +139,16 @@ class Agent(object):
 
                 num_steps += 1
 
+            #
             # Log metrics
             step = update_step.value
-            self.logger.scalar_summary("agent/reward", episode_reward, step)
-            self.logger.scalar_summary("agent/episode_timing", time.time() - ep_start_time, step)
-
-            # Saving agent
-            reward_outperformed = episode_reward - best_reward > self.config["save_reward_threshold"]
-            time_to_save = self.local_episode % self.num_episode_save == 0
-            if self.n_agent == 0 and (time_to_save or reward_outperformed):
-                if episode_reward > best_reward:
-                    best_reward = episode_reward
-                self.save(f"local_episode_{self.local_episode}_reward_{best_reward:4f}")
+            if self.n_agent==0:
+                self.logger.scalar_summary("agent/reward", episode_reward, step)
+                self.logger.scalar_summary("agent/episode_timing", time.time() - ep_start_time, step)
 
             rewards.append(episode_reward)
             if self.agent_type == "exploration" and self.local_episode % self.config['update_agent_ep'] == 0:
                 self.update_actor_learner(learner_w_queue, training_on)
-
 
             ###########################
             if self.local_episode%100 == 0:
@@ -172,9 +170,9 @@ class Agent(object):
                         action = action.detach().cpu().numpy().flatten()
 
                         next_a = action
-                        if self.config["pos_control"]:
-                            # print("current pos: ",current_pos)
-                            next_a += current_pos
+                        # if self.config["pos_control"]:
+                        #     # print("current pos: ",current_pos)
+                        #     next_a += current_pos
                         for _ in range(self.config["action_repeat"]):
                             next_state, reward, done = self.env_wrapper.step(next_a) # Step
                             if done:
@@ -202,11 +200,23 @@ class Agent(object):
             
                 avg_reward /= episodes
                 succeeded /= episodes
-                self.logger.scalar_summary("agent/test", avg_reward, step)
-                self.logger.scalar_summary("agent/success_rate", succeeded, step)
+                if self.n_agent==0:
+                    self.logger.scalar_summary("agent/test", avg_reward, step)
+                    self.logger.scalar_summary("agent/success_rate", succeeded, step)
                 print("----------------------------------------")
                 print("Test Episodes: {}, Avg. Reward: {}, Success rate {}% per {} trials".format(episodes, round(avg_reward, 2), round(succeeded, 2), episodes))
                 print("----------------------------------------")
+
+            # Saving agent
+            reward_outperformed = succeeded - best_succeeded > self.config["save_success_rate_threshold"]
+            # reward_outperformed = episode_reward - best_reward > self.config["save_reward_threshold"]
+            time_to_save = step % self.num_step_save == 0
+            if self.n_agent == 0 and (time_to_save or reward_outperformed):
+                # if episode_reward > best_reward:
+                #     best_reward = episode_reward
+                if succeeded > best_succeeded:
+                    best_succeeded = succeeded
+                self.save(f"local_episode_{step}_reward_{best_succeeded:4f}")
             ###########################
 
         empty_torch_queue(replay_queue)

@@ -11,7 +11,7 @@ class BlueWrapper(EnvWrapper):
         env_kwargs = dict(port = 1050,
                         visionnet_input = False,
                         unity = False,
-                        world_path = '/home/demo/DoorGym/world_generator/world/pull_blue_right_v2_gripper_{}_lefthinge_single/'.format(actuator),
+                        world_path = '/u/home/urakamiy/doorgym/world_generator/world/pull_blue_right_v2_gripper_{}_lefthinge_single/'.format(actuator),
                         pos_control = pos_control,
                         ik_control = False)
 
@@ -44,12 +44,12 @@ class BlueWrapper(EnvWrapper):
             action += self.get_current_pos()
             # print("combined joints: ", action)
 
-        action = action.clip(self._true_action_space.low, self._true_action_space.high)
-        assert self._true_action_space.contains(action)
+        # action = action.clip(self._true_action_space.low, self._true_action_space.high)
+        # assert self._true_action_space.contains(action)
         # print("clipped action: ", action)
 
-        import sys
-        sys.exit(1)
+        # import sys
+        # sys.exit(1)
 
         next_state, reward, terminal, _ = self.env.step(action.ravel())
         return next_state, reward, terminal
